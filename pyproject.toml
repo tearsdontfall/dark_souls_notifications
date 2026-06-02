@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dark-souls-meetings"
+version = "0.1.0"
+description = "Dark Souls style meeting notifications from Apple Calendar"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pyobjc-core",
+    "pyobjc-framework-Cocoa",
+    "pyobjc-framework-EventKit",
+]
+
+[project.scripts]
+notifications-setup = "notifications.__main__:run_setup"
+notifications-watch = "notifications.__main__:run_watch"
+
+[tool.setuptools.packages.find]
+where = ["src"]

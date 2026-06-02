@@ -1,0 +1,7 @@
+{
+  "calendar_ids": ["CALENDAR_ID_FROM_SETUP"],
+  "minutes_before": 2,
+  "poll_interval_seconds": 30,
+  "overlay_duration_seconds": 5,
+  "sound_path": null
+}
