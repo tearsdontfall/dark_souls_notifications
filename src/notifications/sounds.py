@@ -10,9 +10,12 @@ def play_notification(sound_path: str | None) -> None:
         return
     path = Path(sound_path).expanduser()
     if not path.is_file():
-        import sys
+        try:
+            from notifications.logging_config import get_logger
 
-        print(f"Sound file not found: {path}", file=sys.stderr)
+            get_logger().warning("Sound file not found: %s", path)
+        except Exception:
+            pass
         return
     # TODO: richer audio (volume, multiple cues)
     subprocess.Popen(

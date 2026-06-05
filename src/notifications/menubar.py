@@ -17,11 +17,12 @@ from AppKit import (
 from Foundation import NSObject
 from PyObjCTools import AppHelper
 
-from notifications.config import CONFIG_DIR, CONFIG_PATH
+from notifications.config import CONFIG_DIR, CONFIG_PATH, load_config
 from notifications.engine import WatcherEngine
 from notifications.logging_config import LOG_PATH, setup_logging
 from notifications.overlay import show_meeting_overlay_safe
 from notifications.setup_gui import show_setup_window
+from notifications.sound_gui import show_sound_window
 
 logger = setup_logging()
 
@@ -33,6 +34,7 @@ class MenuBarAppDelegate(NSObject):
     status_menu_item = objc.ivar()
     next_menu_item = objc.ivar()
     pause_menu_item = objc.ivar()
+    sound_menu_item = objc.ivar()
 
     def init(self):
         self = objc.super(MenuBarAppDelegate, self).init()
@@ -79,6 +81,17 @@ class MenuBarAppDelegate(NSObject):
             "Select calendars…", "selectCalendars:", ""
         )
         self.menu.addItem_(calendars_item)
+
+        sound_item = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+            "Set notification sound…", "setNotificationSound:", ""
+        )
+        self.menu.addItem_(sound_item)
+
+        self.sound_menu_item = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
+            "Sound: —", None, ""
+        )
+        self.sound_menu_item.setEnabled_(False)
+        self.menu.addItem_(self.sound_menu_item)
 
         config_item = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(
             "Open config folder", "openConfigFolder:", ""
@@ -153,6 +166,22 @@ class MenuBarAppDelegate(NSObject):
         else:
             self.next_menu_item.setTitle_("Next: —")
 
+        sound_path = None
+        if engine.config is not None:
+            sound_path = engine.config.sound_path
+        elif CONFIG_PATH.exists():
+            try:
+                sound_path = load_config().sound_path
+            except OSError:
+                pass
+        if sound_path:
+            name = Path(sound_path).expanduser().name
+            if len(name) > 28:
+                name = name[:25] + "…"
+            self.sound_menu_item.setTitle_(f"Sound: {name}")
+        else:
+            self.sound_menu_item.setTitle_("Sound: off")
+
     def togglePause_(self, _sender) -> None:
         if self.engine.is_watching:
             self.engine.pause()
@@ -192,6 +221,13 @@ class MenuBarAppDelegate(NSObject):
             self._update_menu_labels()
 
         show_setup_window(on_complete=on_complete, on_cancel=on_cancel)
+
+    def setNotificationSound_(self, _sender) -> None:
+        def on_complete():
+            self.engine.reload_config()
+            self._update_menu_labels()
+
+        show_sound_window(on_complete=on_complete)
 
     def openConfigFolder_(self, _sender) -> None:
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)

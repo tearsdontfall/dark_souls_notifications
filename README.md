@@ -39,7 +39,9 @@ Launch by double-clicking. The app lives in the **menu bar** (⚔), with no Dock
 | Pause / Resume | Stop or resume polling |
 | Test notification | Preview the overlay strip |
 | Select calendars… | Re-open calendar picker |
-| Open config folder | Edit `config.json`, sounds, etc. |
+| Set notification sound… | Pick audio file, test, or disable sound |
+| Sound: … | Current sound file (read-only) |
+| Open config folder | Edit `config.json` manually |
 | Show log in Finder | `~/.cache/dark-souls-meetings/app.log` |
 | Quit | Exit the app |
 
@@ -81,19 +83,17 @@ See [`config.example.json`](config.example.json):
 
 ## Custom sound
 
-1. Put a file `afplay` supports (`.wav`, `.mp3`, `.aiff`, `.m4a`) anywhere, e.g.:
+**From the menu bar:** **Set notification sound…** → choose a file → **Test sound** → **Save**.
 
-   ```text
-   ~/.config/dark-souls-meetings/sounds/summon.wav
-   ```
+Supported formats: `.wav`, `.mp3`, `.aiff`, `.m4a`, `.caf`, `.aac`. A good place to store files:
 
-2. In `config.json`:
+```text
+~/.config/dark-souls-meetings/sounds/summon.wav
+```
 
-   ```json
-   "sound_path": "~/.config/dark-souls-meetings/sounds/summon.wav"
-   ```
+**Disable sound:** **Disable sound** → **Save**, or set `"sound_path": null` in `config.json`.
 
-3. Restart the app (Quit → relaunch). Sound plays when the strip appears.
+Changes apply immediately — no restart needed.
 
 ## Test
 
@@ -115,4 +115,4 @@ Screen Recording and Accessibility are **not** required.
 
 - Main display only
 - First matching meeting per poll if several overlap
-- Setup GUI selects calendars only; `sound_path` via config folder
+- Setup GUI selects calendars; sound via menu or config folder
