@@ -15,9 +15,15 @@ def run_watch() -> None:
     raise SystemExit(_run_watch())
 
 
+def run_app() -> None:
+    from notifications.app import main as _app_main
+
+    _app_main()
+
+
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python -m notifications {setup|watch}", file=sys.stderr)
+        print("Usage: python -m notifications {setup|watch|app}", file=sys.stderr)
         raise SystemExit(1)
 
     command = sys.argv[1].lower()
@@ -25,9 +31,11 @@ def main() -> None:
         run_setup()
     elif command == "watch":
         run_watch()
+    elif command == "app":
+        run_app()
     else:
         print(f"Unknown command: {command}", file=sys.stderr)
-        print("Usage: python -m notifications {setup|watch}", file=sys.stderr)
+        print("Usage: python -m notifications {setup|watch|app}", file=sys.stderr)
         raise SystemExit(1)
 
 

@@ -6,13 +6,8 @@
     <string>com.knolss.meetings-watcher</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/knolss/notifications/.venv/bin/python</string>
-        <string>-m</string>
-        <string>notifications</string>
-        <string>watch</string>
+        <string>/Applications/Dark Souls Meetings.app/Contents/MacOS/Dark Souls Meetings</string>
     </array>
-    <key>WorkingDirectory</key>
-    <string>/Users/knolss/notifications</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

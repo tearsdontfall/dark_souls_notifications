@@ -17,6 +17,10 @@ dependencies = [
 [project.scripts]
 notifications-setup = "notifications.__main__:run_setup"
 notifications-watch = "notifications.__main__:run_watch"
+notifications-app = "notifications.app:main"
+
+[project.optional-dependencies]
+build = ["py2app"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

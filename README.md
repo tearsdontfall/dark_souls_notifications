@@ -1,60 +1,75 @@
 # Dark Souls Meeting Notifications
 
-Full-width overlay strip **2 minutes before** calendar meetings, Dark Souls style. Reads **Apple Calendar** via EventKit (including calendars synced from corporate Outlook). **VPN is not required** for the watcher — only Calendar sync on your Mac matters.
+Full-width overlay strip **2 minutes before** calendar meetings, Dark Souls style. Reads **Apple Calendar** via EventKit (including calendars synced from corporate Outlook). **VPN is not required** — only Calendar sync on your Mac matters.
 
-## Requirements
+## Menu bar app (recommended)
 
-- macOS with Apple Calendar
-- Python 3.11+
-- Calendar permission for Terminal (or your Python app) in **System Settings → Privacy & Security → Calendar**
-
-Screen Recording and Accessibility are **not** required for the overlay.
-
-## Install
+### Build `.app`
 
 ```bash
 cd /Users/knolss/notifications
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -e ".[build]"
+python setup_app.py py2app
+```
+
+Output: `macos_app/dist/Dark Souls Meetings.app`
+
+Copy to Applications:
+
+```bash
+cp -r "macos_app/dist/Dark Souls Meetings.app" /Applications/
+```
+
+Launch by double-clicking. The app lives in the **menu bar** (⚔), with no Dock icon and no Terminal window.
+
+### First launch
+
+1. macOS asks for **Calendar** access — allow it for **Dark Souls Meetings** (not Terminal).
+2. A window opens to **select calendars** (checkboxes). Click **Save**.
+3. The watcher starts automatically. Menu shows `● Watching` and the next meeting.
+
+### Menu bar actions
+
+| Item | Action |
+|------|--------|
+| ● Watching / ○ Paused | Current status |
+| Next: … | Nearest meeting in the next 2 hours |
+| Pause / Resume | Stop or resume polling |
+| Test notification | Preview the overlay strip |
+| Select calendars… | Re-open calendar picker |
+| Open config folder | Edit `config.json`, sounds, etc. |
+| Show log in Finder | `~/.cache/dark-souls-meetings/app.log` |
+| Quit | Exit the app |
+
+### Calendar permission migration
+
+If you previously used the Terminal watcher, grant Calendar access to **Dark Souls Meetings** in **System Settings → Privacy & Security → Calendar**. You can revoke access for Terminal/Python if no longer needed.
+
+### Auto-start at login
+
+```bash
+cp scripts/com.knolss.meetings-watcher.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.knolss.meetings-watcher.plist
+```
+
+The plist expects the app at `/Applications/Dark Souls Meetings.app`. Edit the path if you installed elsewhere.
+
+## Dev mode (Terminal)
+
+```bash
 pip install -e .
+python -m notifications app      # menu bar from Python (for development)
+python -m notifications setup    # terminal calendar picker
+python -m notifications watch    # terminal-only watcher
 ```
 
-## First run — pick calendars
-
-```bash
-python -m notifications setup
-```
-
-Choose calendar numbers (comma-separated) or `all`. Config is saved to:
-
-`~/.config/dark-souls-meetings/config.json`
-
-## Run watcher
-
-```bash
-python -m notifications watch
-```
-
-Or use entry points after install:
-
-```bash
-notifications-setup
-notifications-watch
-```
-
-The watcher polls every 30 seconds and shows a centered full-width strip when a meeting starts in **105–135 seconds** (2 minutes ±15 s).
-
-## Test
-
-1. Create a test event in Calendar starting **3–4 minutes** from now.
-2. Run `python -m notifications watch`.
-3. About 2 minutes before start you should see **YOU HAVE BEEN SUMMONED** with the event title.
-
-Restarting the watcher should **not** show the same event again (dedup cache at `~/.cache/dark-souls-meetings/notified.json`).
+Config: `~/.config/dark-souls-meetings/config.json`
 
 ## Config
 
-See [`config.example.json`](config.example.json). Editable fields in `~/.config/dark-souls-meetings/config.json`:
+See [`config.example.json`](config.example.json):
 
 | Field | Default | Description |
 |-------|---------|-------------|
@@ -62,41 +77,42 @@ See [`config.example.json`](config.example.json). Editable fields in `~/.config/
 | `minutes_before` | 2 | Target minutes before start |
 | `poll_interval_seconds` | 30 | Poll interval |
 | `overlay_duration_seconds` | 5 | How long the strip stays visible |
-| `sound_path` | `null` | Absolute or `~` path to a sound file (see below) |
+| `sound_path` | `null` | Path to audio file for `afplay` |
 
 ## Custom sound
 
-1. Put any file **`afplay`** can play (`.wav`, `.mp3`, `.aiff`, `.m4a`, …) anywhere on disk, for example:
+1. Put a file `afplay` supports (`.wav`, `.mp3`, `.aiff`, `.m4a`) anywhere, e.g.:
 
    ```text
    ~/.config/dark-souls-meetings/sounds/summon.wav
    ```
 
-2. In `~/.config/dark-souls-meetings/config.json` set **`sound_path`** to the full path:
+2. In `config.json`:
 
    ```json
-   {
-     "sound_path": "/Users/you/.config/dark-souls-meetings/sounds/summon.wav"
-   }
+   "sound_path": "~/.config/dark-souls-meetings/sounds/summon.wav"
    ```
 
-   Tilde works too: `"sound_path": "~/.config/dark-souls-meetings/sounds/summon.mp3"`
+3. Restart the app (Quit → relaunch). Sound plays when the strip appears.
 
-3. Restart the watcher. The sound plays when the strip appears. If the path is wrong, the watcher logs `Sound file not found: ...` to stderr and continues without audio.
+## Test
 
-To disable sound again, set `"sound_path": null`.
+1. Create a test event in Calendar **3–4 minutes** from now.
+2. Run the app (`.app` or `python -m notifications app`).
+3. About **2 minutes** before start, the centered strip appears.
 
-## Optional: run at login
+Dedup cache: `~/.cache/dark-souls-meetings/notified.json` — restarting won't re-notify the same event.
 
-Copy and edit [`scripts/com.knolss.meetings-watcher.plist`](scripts/com.knolss.meetings-watcher.plist) with your user and venv paths, then:
+## Requirements
 
-```bash
-cp scripts/com.knolss.meetings-watcher.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.knolss.meetings-watcher.plist
-```
+- macOS with Apple Calendar
+- Python 3.11+ (for building; the `.app` bundles its own runtime)
+- Calendar permission for the app
 
-## Limitations (MVP)
+Screen Recording and Accessibility are **not** required.
+
+## Limitations
 
 - Main display only
-- First matching meeting per poll tick if several overlap
-- No Teams link / attendees — title and start time only
+- First matching meeting per poll if several overlap
+- Setup GUI selects calendars only; `sound_path` via config folder
