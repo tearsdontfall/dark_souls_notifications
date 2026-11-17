@@ -7,7 +7,8 @@ Full-width overlay strip **2 minutes before** calendar meetings, Dark Souls styl
 ### Build `.app`
 
 ```bash
-cd /Users/knolss/notifications
+git clone https://github.com/tearsdontfall/dark_souls_notifications.git
+cd dark_souls_notifications
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[build]"
@@ -52,11 +53,12 @@ If you previously used the Terminal watcher, grant Calendar access to **Dark Sou
 ### Auto-start at login
 
 ```bash
-cp scripts/com.knolss.meetings-watcher.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.knolss.meetings-watcher.plist
+mkdir -p ~/Library/LaunchAgents
+cp scripts/com.example.meetings-watcher.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.example.meetings-watcher.plist
 ```
 
-The plist expects the app at `/Applications/Dark Souls Meetings.app`. Edit the path if you installed elsewhere.
+The plist expects the app at `/Applications/Dark Souls Meetings.app`. Edit the path if you installed elsewhere. Use an absolute path: `launchd` does not expand `~` or `$HOME` in plist fields.
 
 ## Dev mode (Terminal)
 

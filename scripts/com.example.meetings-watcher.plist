@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.knolss.meetings-watcher</string>
+    <string>com.example.meetings-watcher</string>
     <key>ProgramArguments</key>
     <array>
         <string>/Applications/Dark Souls Meetings.app/Contents/MacOS/Dark Souls Meetings</string>
